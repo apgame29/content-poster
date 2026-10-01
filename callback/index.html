@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Authorization · content-poster</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<h1 id="title">กำลังอ่านผลการอนุญาต…</h1>
+<p id="msg" class="muted"></p>
+<div id="box" class="box" hidden></div>
+<button id="copy" hidden>Copy</button>
+<p class="muted" style="margin-top:32px">หน้านี้แสดงผลในเบราว์เซอร์อย่างเดียว ไม่ส่งข้อมูลไปที่ไหน · This page only displays the result locally and sends nothing anywhere.</p>
+</main>
+<script>
+  // อ่านค่าจาก URL แล้วแสดงบนจอเท่านั้น ไม่มีการส่งข้อมูลออกไป
+  const full = location.href;  // เก็บไว้ก่อนลบรหัสออกจากแถบที่อยู่
+  const q = new URLSearchParams(location.search);
+  const title = document.getElementById('title'), msg = document.getElementById('msg');
+  const box = document.getElementById('box'), btn = document.getElementById('copy');
+  if (q.get('code')) {
+    title.textContent = 'อนุญาตสำเร็จ ✓';
+    msg.textContent = 'กด Copy แล้วกลับไปวางใน Terminal ที่สคริปต์รอถามอยู่ (กดวางครั้งเดียว) · Copy this and paste it into the waiting Terminal script.';
+    box.textContent = full;
+    box.hidden = btn.hidden = false;
+    btn.onclick = async () => { await navigator.clipboard.writeText(full); btn.textContent = 'Copied ✓'; };
+    history.replaceState(null, '', location.pathname);  // ลบรหัสออกจากแถบที่อยู่หลังโชว์แล้ว
+  } else if (q.get('error')) {
+    title.textContent = 'ไม่ได้อนุญาต';
+    msg.textContent = (q.get('error_description') || q.get('error')) + ' · ลองใหม่อีกครั้งจากสคริปต์';
+  } else {
+    title.textContent = 'content-poster';
+    msg.textContent = 'หน้านี้ใช้รับผลหลังอนุญาตบัญชีเท่านั้น · Authorization callback page.';
+  }
+</script>
+</body>
+</html>
